@@ -1,65 +1,312 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import { Settings, ChevronDown, X } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+export default function Dashboard() {
+  const router = useRouter();
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  
+  // Modal form state
+  const [templateName, setTemplateName] = useState("PatientReferralDocument");
+  const [llm, setLlm] = useState("GPT-4");
+  const [description, setDescription] = useState("A document containing key clinical and demographic details used to refer a patient to another healthcare provider or specialist for further evaluation, treatment, or consultation.");
+  const [confidenceScore, setConfidenceScore] = useState(50);
+
+  const templates = [
+    {
+      name: "PatientCaseIntake",
+      contextDefinition: "PatientCaseIntakeInformation",
+      contextMapping: "Patient Case Information Mapping",
+    },
+    {
+      name: "DiseaseDefinition",
+      contextDefinition: "DiseaseDefinitionDetails__stdctx",
+      contextMapping: "DiseaseDefinitionMapping",
+    },
+  ];
+
+  const handleCreateTemplate = () => {
+    setShowModal(false);
+    router.push("/builder");
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="max-w-6xl">
+      {/* Page Header */}
+      <div className="bg-white rounded-lg shadow-sm mb-6">
+        <div className="p-4 flex items-center gap-4">
+          <div className="w-12 h-12 bg-[#0176D3] rounded-lg flex items-center justify-center">
+            <Settings className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <p className="text-xs text-[#0176D3] font-medium uppercase tracking-wide">
+              SETUP
+            </p>
+            <h1 className="text-xl font-semibold text-gray-900">
+              Intelligent Document Processing
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </div>
+
+      {/* IDP Toggle Section */}
+      <div className="bg-white rounded-lg shadow-sm mb-6 p-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">
+              Intelligent Document Processing
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Process PDFs using Einstein Generative AI and large language
+              models (LLMs) to extract the content and map it with the Health
+              Cloud objects and fields.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsEnabled(!isEnabled)}
+              className={`relative w-12 h-6 rounded-full transition-colors ${
+                isEnabled ? "bg-[#0176D3]" : "bg-gray-300"
+              }`}
+            >
+              <span
+                className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                  isEnabled ? "right-1" : "left-1"
+                }`}
+              />
+            </button>
+            <span className="text-xs text-gray-600">
+              {isEnabled ? "Enabled" : "Disabled"}
+            </span>
+          </div>
         </div>
-      </main>
+      </div>
+
+      {/* Digitalize Document Content Section */}
+      <div className="bg-white rounded-lg shadow-sm p-5">
+        <h2 className="text-base font-semibold text-gray-900 mb-2">
+          Digitalize Document Content
+        </h2>
+        <p className="text-sm text-gray-600 mb-6">
+          Create extraction templates to define the fields from which values are
+          extracted from a file. In the prompt description, provide instructions
+          for generative AI to identify the values of each specified field.
+          Based on your requirements, you can choose the appropriate template to
+          extract the relevant field values for each specified field.
+        </p>
+
+        {/* Extraction Templates Card */}
+        <div className="border border-gray-200 rounded-lg">
+          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">
+                Extraction Templates
+              </h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                2 items · Sorted by Extraction Template Name
+              </p>
+            </div>
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-[#0176D3] text-white text-sm font-medium px-4 py-2 rounded hover:bg-[#015ba1] transition-colors"
+            >
+              Create Extraction Template
+            </button>
+          </div>
+
+          {/* Table */}
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-200 bg-gray-50">
+                <th className="text-left text-xs font-medium text-gray-600 px-4 py-3">
+                  <div className="flex items-center gap-1 cursor-pointer">
+                    Extraction Template name
+                    <ChevronDown className="w-3 h-3" />
+                  </div>
+                </th>
+                <th className="text-left text-xs font-medium text-gray-600 px-4 py-3">
+                  <div className="flex items-center gap-1 cursor-pointer">
+                    Context Definition Name
+                    <ChevronDown className="w-3 h-3" />
+                  </div>
+                </th>
+                <th className="text-left text-xs font-medium text-gray-600 px-4 py-3">
+                  <div className="flex items-center gap-1 cursor-pointer">
+                    Context Mapping Name
+                    <ChevronDown className="w-3 h-3" />
+                  </div>
+                </th>
+                <th className="w-12"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {templates.map((template, index) => (
+                <tr
+                  key={index}
+                  className="border-b border-gray-100 hover:bg-gray-50"
+                >
+                  <td className="px-4 py-3">
+                    <Link
+                      href="/builder"
+                      className="text-sm text-[#0176D3] hover:underline cursor-pointer"
+                    >
+                      {template.name}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    {template.contextDefinition}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    {template.contextMapping}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button className="text-gray-400 hover:text-gray-600">
+                      <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Modal Overlay */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setShowModal(false)}
+          />
+          
+          {/* Modal */}
+          <div className="relative bg-white rounded-lg shadow-2xl w-full max-w-3xl mx-4 max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">
+                New Extraction Template
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="px-6 py-5 max-h-[60vh] overflow-y-auto">
+              {/* Details Section */}
+              <h3 className="text-base font-semibold text-gray-900 mb-4">Details</h3>
+              
+              <div className="grid grid-cols-2 gap-6 mb-6">
+                {/* Template Name */}
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1.5">
+                    <span className="text-red-500">* </span>Template Name
+                  </label>
+                  <input
+                    type="text"
+                    value={templateName}
+                    onChange={(e) => setTemplateName(e.target.value)}
+                    className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#0176D3] focus:ring-1 focus:ring-[#0176D3]"
+                  />
+                </div>
+
+                {/* Select LLM */}
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1.5">
+                    <span className="text-red-500">* </span>Select LLM
+                  </label>
+                  <select
+                    value={llm}
+                    onChange={(e) => setLlm(e.target.value)}
+                    className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2.5 bg-white focus:outline-none focus:border-[#0176D3] focus:ring-1 focus:ring-[#0176D3]"
+                  >
+                    <option value="GPT-4">GPT-4</option>
+                    <option value="GPT-3.5">GPT-3.5</option>
+                    <option value="Claude 3">Claude 3</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="mb-6">
+                <label className="block text-sm text-gray-700 mb-1.5">
+                  Description
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#0176D3] focus:ring-1 focus:ring-[#0176D3] resize-none"
+                />
+              </div>
+
+              {/* Confidence Score Section */}
+              <h3 className="text-base font-semibold text-gray-900 mb-2">Confidence Score</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Set a confidence score range (minimum being 0) below which, extractions require manual review and define a low-confidence range to alert business users for validation.
+              </p>
+
+              <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm text-gray-700">Low Confidence Range</span>
+                  <span className="text-sm font-medium text-gray-900">0-{confidenceScore}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex-1 relative">
+                    {/* Track background */}
+                    <div className="h-1.5 bg-gray-200 rounded-full">
+                      {/* Filled track */}
+                      <div
+                        className="h-1.5 bg-[#0176D3] rounded-full"
+                        style={{ width: `${confidenceScore}%` }}
+                      />
+                    </div>
+                    {/* Slider input */}
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={confidenceScore}
+                      onChange={(e) => setConfidenceScore(Number(e.target.value))}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    {/* Thumb indicator */}
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-[#0176D3] rounded-full border-2 border-white shadow-md pointer-events-none"
+                      style={{ left: `calc(${confidenceScore}% - 8px)` }}
+                    />
+                  </div>
+                  <span className="text-sm text-gray-500 w-8">100</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateTemplate}
+                className="px-4 py-2 text-sm font-medium text-white bg-[#0176D3] rounded-lg hover:bg-[#015ba1] transition-colors"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
