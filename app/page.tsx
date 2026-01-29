@@ -35,9 +35,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="max-w-6xl">
+    <div className="w-full">
       {/* Page Header */}
-      <div className="bg-white rounded-lg shadow-sm mb-6">
+      <div className="bg-white border border-gray-200 rounded-md mb-4">
         <div className="p-4 flex items-center gap-4">
           <div className="w-12 h-12 bg-[#0176D3] rounded-lg flex items-center justify-center">
             <Settings className="w-6 h-6 text-white" />
@@ -48,13 +48,13 @@ export default function Dashboard() {
             </p>
             <h1 className="text-xl font-semibold text-gray-900">
               Intelligent Document Processing
-          </h1>
+            </h1>
           </div>
         </div>
       </div>
 
       {/* IDP Toggle Section */}
-      <div className="bg-white rounded-lg shadow-sm mb-6 p-5">
+      <div className="bg-white border border-gray-200 rounded-md mb-4 p-5">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-base font-semibold text-gray-900">
@@ -87,11 +87,11 @@ export default function Dashboard() {
       </div>
 
       {/* Digitalize Document Content Section */}
-      <div className="bg-white rounded-lg shadow-sm p-5">
+      <div className="bg-white border border-gray-200 rounded-md p-5">
         <h2 className="text-base font-semibold text-gray-900 mb-2">
           Digitalize Document Content
         </h2>
-        <p className="text-sm text-gray-600 mb-6">
+        <p className="text-sm text-gray-600 mb-5">
           Create extraction templates to define the fields from which values are
           extracted from a file. In the prompt description, provide instructions
           for generative AI to identify the values of each specified field.
@@ -100,8 +100,8 @@ export default function Dashboard() {
         </p>
 
         {/* Extraction Templates Card */}
-        <div className="border border-gray-200 rounded-lg">
-          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+        <div className="border border-gray-200 rounded-md overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold text-gray-900">
                 Extraction Templates
@@ -118,38 +118,38 @@ export default function Dashboard() {
             </button>
           </div>
 
-          {/* Table */}
+          {/* Table - flush with card edges */}
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left text-xs font-medium text-gray-600 px-4 py-3">
+                <th className="text-left text-xs font-medium text-gray-600 px-4 py-2.5">
                   <div className="flex items-center gap-1 cursor-pointer">
                     Extraction Template name
                     <ChevronDown className="w-3 h-3" />
                   </div>
                 </th>
-                <th className="text-left text-xs font-medium text-gray-600 px-4 py-3">
+                <th className="text-left text-xs font-medium text-gray-600 px-4 py-2.5">
                   <div className="flex items-center gap-1 cursor-pointer">
                     Context Definition Name
                     <ChevronDown className="w-3 h-3" />
                   </div>
                 </th>
-                <th className="text-left text-xs font-medium text-gray-600 px-4 py-3">
+                <th className="text-left text-xs font-medium text-gray-600 px-4 py-2.5">
                   <div className="flex items-center gap-1 cursor-pointer">
                     Context Mapping Name
                     <ChevronDown className="w-3 h-3" />
                   </div>
                 </th>
-                <th className="w-12"></th>
+                <th className="w-10"></th>
               </tr>
             </thead>
             <tbody>
               {templates.map((template, index) => (
                 <tr
                   key={index}
-                  className="border-b border-gray-100 hover:bg-gray-50"
+                  className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
                 >
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-2.5">
                     <Link
                       href="/builder"
                       className="text-sm text-[#0176D3] hover:underline cursor-pointer"
@@ -157,15 +157,15 @@ export default function Dashboard() {
                       {template.name}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">
+                  <td className="px-4 py-2.5 text-sm text-gray-700">
                     {template.contextDefinition}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">
+                  <td className="px-4 py-2.5 text-sm text-gray-700">
                     {template.contextMapping}
                   </td>
-                  <td className="px-4 py-3">
-                    <button className="text-gray-400 hover:text-gray-600">
-                      <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
+                  <td className="px-4 py-2.5">
+                    <button className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 text-gray-500 hover:bg-gray-100">
+                      <ChevronDown className="w-3 h-3 rotate-[-90deg]" />
                     </button>
                   </td>
                 </tr>

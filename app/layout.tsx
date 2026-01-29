@@ -76,7 +76,7 @@ export default function RootLayout({
             <Sidebar />
 
             {/* Main Content */}
-            <main className="ml-[250px] flex-1 bg-gray-100 min-h-[calc(100vh-88px)] p-6">
+            <main className="ml-[250px] flex-1 bg-[#F3F3F3] min-h-[calc(100vh-88px)] p-4">
               {children}
             </main>
           </div>
