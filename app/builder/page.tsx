@@ -135,6 +135,7 @@ export default function BuilderPage() {
   const [templateName, setTemplateName] = useState("PatientReferralDocument");
   const [llm, setLlm] = useState("GPT-4");
   const [description, setDescription] = useState("A document containing key clinical and demographic details used to refer a patient to another healthcare provider or specialist for further evaluation, treatment, or consultation.");
+  const [selectedContext, setSelectedContext] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -221,6 +222,22 @@ export default function BuilderPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              if (selectedContext) {
+                // Save logic - can be extended later
+                console.log("Save clicked", { selectedContext, templateName, llm, description });
+              }
+            }}
+            disabled={!selectedContext}
+            className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${
+              selectedContext
+                ? "bg-white text-[#0176D3] hover:bg-gray-50 cursor-pointer"
+                : "bg-gray-300 text-gray-600 cursor-not-allowed"
+            }`}
+          >
+            Save
+          </button>
           <button className="flex items-center gap-1 text-sm text-white/90 hover:text-white">
             <Settings className="w-4 h-4" />
             Settings
@@ -233,7 +250,7 @@ export default function BuilderPage() {
       </header>
 
       {/* Tab Bar */}
-      <div className="flex-none bg-white border-b border-gray-200 px-4 flex items-center justify-between z-40">
+      <div className="flex-none bg-white border-b border-gray-200 px-4 flex items-center z-40">
         <div className="flex">
           <button
             onClick={() => setActiveTab("configuration")}
@@ -272,6 +289,8 @@ export default function BuilderPage() {
             setDescription={setDescription}
             confidenceScore={confidenceScore}
             setConfidenceScore={setConfidenceScore}
+            selectedContext={selectedContext}
+            setSelectedContext={setSelectedContext}
           />
         ) : (
           <PlaygroundView
@@ -294,6 +313,7 @@ export default function BuilderPage() {
             updatePrompt={updatePrompt}
             handleFileSelect={handleFileSelect}
             handleClearUpload={handleClearUpload}
+            selectedContext={selectedContext}
           />
         )}
       </div>
@@ -311,6 +331,8 @@ interface ConfigurationViewProps {
   setDescription: (v: string) => void;
   confidenceScore: number;
   setConfidenceScore: (v: number) => void;
+  selectedContext: string;
+  setSelectedContext: (v: string) => void;
 }
 
 function ConfigurationView({
@@ -322,9 +344,10 @@ function ConfigurationView({
   setDescription,
   confidenceScore,
   setConfidenceScore,
+  selectedContext,
+  setSelectedContext,
 }: ConfigurationViewProps) {
   const [expandedFields, setExpandedFields] = useState<string[]>(["referral-request"]);
-  const [contextDefinition, setContextDefinition] = useState<string>("");
 
   const toggleFieldExpanded = (id: string) => {
     setExpandedFields((prev) =>
@@ -341,14 +364,13 @@ function ConfigurationView({
           <h4 className="text-sm font-semibold text-gray-900 mb-1">Context Definition Name</h4>
           <p className="text-xs text-gray-500 mb-3">Select the Context Definition to extract and map to fields on an object.</p>
           <select 
-            value={contextDefinition}
-            onChange={(e) => setContextDefinition(e.target.value)}
+            value={selectedContext}
+            onChange={(e) => setSelectedContext(e.target.value)}
             className="w-full text-sm border border-gray-300 rounded px-3 py-2 bg-white mb-2"
           >
-            <option value="">Select</option>
+            <option value="">Select...</option>
             <option value="PatientReferralDocument">PatientReferralDocument</option>
-            <option value="PatientCaseIntake">PatientCaseIntake</option>
-            <option value="DiseaseDefinition">DiseaseDefinition</option>
+            <option value="ClinicalSummary">ClinicalSummary</option>
           </select>
           <button className="w-full text-sm text-[#0176D3] border border-[#0176D3] rounded px-3 py-2 hover:bg-blue-50 mb-3">
             Edit Context Definition
@@ -413,31 +435,33 @@ function ConfigurationView({
             </div>
           </div>
 
-          {/* Document (Attribute) Fields - flat design */}
-          <div className="bg-white overflow-hidden">
-            {/* Table Header */}
-            <div className="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
-              <div className="px-4 py-3 text-sm font-medium text-gray-700 flex items-center gap-2">
-                Document (Attribute) Fields
-                <ChevronDown className="w-4 h-4 text-gray-400" />
+          {/* Document (Attribute) Fields - flat design - Only show if context is selected */}
+          {selectedContext && (
+            <div className="bg-white overflow-hidden">
+              {/* Table Header */}
+              <div className="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+                <div className="px-4 py-3 text-sm font-medium text-gray-700 flex items-center gap-2">
+                  Document (Attribute) Fields
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                </div>
+                <div className="px-4 py-3 text-sm font-medium text-gray-700 flex items-center gap-2">
+                  Prompt Description
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                </div>
               </div>
-              <div className="px-4 py-3 text-sm font-medium text-gray-700 flex items-center gap-2">
-                Prompt Description
-                <ChevronDown className="w-4 h-4 text-gray-400" />
-              </div>
-            </div>
 
-            {/* Table Rows */}
-            {attributeFields.map((field) => (
-              <AttributeFieldRow
-                key={field.id}
-                field={field}
-                level={0}
-                expandedFields={expandedFields}
-                toggleExpanded={toggleFieldExpanded}
-              />
-            ))}
-          </div>
+              {/* Table Rows */}
+              {attributeFields.map((field) => (
+                <AttributeFieldRow
+                  key={field.id}
+                  field={field}
+                  level={0}
+                  expandedFields={expandedFields}
+                  toggleExpanded={toggleFieldExpanded}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -519,6 +543,7 @@ interface PlaygroundViewProps {
   updatePrompt: (id: string, value: string) => void;
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleClearUpload: () => void;
+  selectedContext: string;
 }
 
 function PlaygroundView({
@@ -541,6 +566,7 @@ function PlaygroundView({
   updatePrompt,
   handleFileSelect,
   handleClearUpload,
+  selectedContext,
 }: PlaygroundViewProps) {
   return (
     <div className="h-full grid grid-cols-3 overflow-hidden">
@@ -676,19 +702,27 @@ function PlaygroundView({
 
         {/* Scrollable Body */}
         <div className="flex-1 min-h-0 overflow-y-auto">
-          {entityData.map((entity) => (
-            <EntityTreeItem
-              key={entity.id}
-              item={entity}
-              level={0}
-              expandedIds={expandedIds}
-              toggleExpand={toggleExpanded}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-              prompts={prompts}
-              onPromptChange={updatePrompt}
-            />
-          ))}
+          {!selectedContext ? (
+            <div className="h-full flex items-center justify-center p-8">
+              <p className="text-sm text-gray-500 text-center">
+                Select a Context Definition in the Configuration tab to generate prompts.
+              </p>
+            </div>
+          ) : (
+            entityData.map((entity) => (
+              <EntityTreeItem
+                key={entity.id}
+                item={entity}
+                level={0}
+                expandedIds={expandedIds}
+                toggleExpand={toggleExpanded}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                prompts={prompts}
+                onPromptChange={updatePrompt}
+              />
+            ))
+          )}
         </div>
       </div>
 

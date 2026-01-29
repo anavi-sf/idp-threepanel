@@ -9,11 +9,13 @@ export default function Dashboard() {
   const router = useRouter();
   const [isEnabled, setIsEnabled] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  
+
   // Modal form state
   const [templateName, setTemplateName] = useState("PatientReferralDocument");
   const [llm, setLlm] = useState("GPT-4");
-  const [description, setDescription] = useState("A document containing key clinical and demographic details used to refer a patient to another healthcare provider or specialist for further evaluation, treatment, or consultation.");
+  const [description, setDescription] = useState(
+    "A document containing key clinical and demographic details used to refer a patient to another healthcare provider or specialist for further evaluation, treatment, or consultation."
+  );
   const [confidenceScore, setConfidenceScore] = useState(50);
 
   const templates = [
@@ -35,147 +37,155 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="w-full">
-      {/* Page Header */}
-      <div className="bg-white border border-gray-200 rounded-md mb-4">
-        <div className="p-4 flex items-center gap-4">
-          <div className="w-12 h-12 bg-[#0176D3] rounded-lg flex items-center justify-center">
-            <Settings className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <p className="text-xs text-[#0176D3] font-medium uppercase tracking-wide">
-              SETUP
-            </p>
-            <h1 className="text-xl font-semibold text-gray-900">
-              Intelligent Document Processing
-            </h1>
+    <div className="min-h-full bg-[#F3F3F3] p-6">
+      <div className="max-w-[1600px] mx-auto">
+        {/* ==================== CARD 1: Header Card ==================== */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4 shadow-sm">
+          <div className="flex items-center gap-4">
+            {/* Blue Icon Box */}
+            <div className="w-10 h-10 bg-[#0176D3] rounded flex items-center justify-center flex-shrink-0">
+              <Settings className="w-5 h-5 text-white" />
+            </div>
+            {/* Text Stack */}
+            <div>
+              <p className="text-xs text-[#0176D3] font-semibold uppercase tracking-wide">
+                SETUP
+              </p>
+              <h1 className="text-xl font-semibold text-gray-900">
+                Intelligent Document Processing
+              </h1>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* IDP Toggle Section */}
-      <div className="bg-white border border-gray-200 rounded-md mb-4 p-5">
-        <div className="flex items-center justify-between">
-          <div>
+        {/* ==================== CARD 2: Main Content Card ==================== */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+          {/* Header Row with Title and Toggle */}
+          <div className="flex items-start justify-between mb-2">
             <h2 className="text-base font-semibold text-gray-900">
               Intelligent Document Processing
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Process PDFs using Einstein Generative AI and large language
-              models (LLMs) to extract the content and map it with the Health
-              Cloud objects and fields.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsEnabled(!isEnabled)}
-              className={`relative w-12 h-6 rounded-full transition-colors ${
-                isEnabled ? "bg-[#0176D3]" : "bg-gray-300"
-              }`}
-            >
-              <span
-                className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                  isEnabled ? "right-1" : "left-1"
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={() => setIsEnabled(!isEnabled)}
+                className={`relative w-11 h-6 rounded-full transition-colors ${
+                  isEnabled ? "bg-[#0176D3]" : "bg-gray-300"
                 }`}
-              />
-            </button>
-            <span className="text-xs text-gray-600">
-              {isEnabled ? "Enabled" : "Disabled"}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Digitalize Document Content Section */}
-      <div className="bg-white border border-gray-200 rounded-md p-5">
-        <h2 className="text-base font-semibold text-gray-900 mb-2">
-          Digitalize Document Content
-        </h2>
-        <p className="text-sm text-gray-600 mb-5">
-          Create extraction templates to define the fields from which values are
-          extracted from a file. In the prompt description, provide instructions
-          for generative AI to identify the values of each specified field.
-          Based on your requirements, you can choose the appropriate template to
-          extract the relevant field values for each specified field.
-        </p>
-
-        {/* Extraction Templates Card */}
-        <div className="border border-gray-200 rounded-md overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">
-                Extraction Templates
-              </h3>
-              <p className="text-xs text-gray-500 mt-0.5">
-                2 items · Sorted by Extraction Template Name
-              </p>
+              >
+                <span
+                  className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${
+                    isEnabled ? "right-1" : "left-1"
+                  }`}
+                />
+              </button>
+              <span className="text-xs text-gray-600">
+                {isEnabled ? "Enabled" : "Disabled"}
+              </span>
             </div>
-            <button
-              onClick={() => setShowModal(true)}
-              className="bg-[#0176D3] text-white text-sm font-medium px-4 py-2 rounded hover:bg-[#015ba1] transition-colors"
-            >
-              Create Extraction Template
-            </button>
           </div>
 
-          {/* Table - flush with card edges */}
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left text-xs font-medium text-gray-600 px-4 py-2.5">
-                  <div className="flex items-center gap-1 cursor-pointer">
-                    Extraction Template name
-                    <ChevronDown className="w-3 h-3" />
-                  </div>
-                </th>
-                <th className="text-left text-xs font-medium text-gray-600 px-4 py-2.5">
-                  <div className="flex items-center gap-1 cursor-pointer">
-                    Context Definition Name
-                    <ChevronDown className="w-3 h-3" />
-                  </div>
-                </th>
-                <th className="text-left text-xs font-medium text-gray-600 px-4 py-2.5">
-                  <div className="flex items-center gap-1 cursor-pointer">
-                    Context Mapping Name
-                    <ChevronDown className="w-3 h-3" />
-                  </div>
-                </th>
-                <th className="w-10"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {templates.map((template, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
-                >
-                  <td className="px-4 py-2.5">
-                    <Link
-                      href="/builder"
-                      className="text-sm text-[#0176D3] hover:underline cursor-pointer"
-                    >
-                      {template.name}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-2.5 text-sm text-gray-700">
-                    {template.contextDefinition}
-                  </td>
-                  <td className="px-4 py-2.5 text-sm text-gray-700">
-                    {template.contextMapping}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <button className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 text-gray-500 hover:bg-gray-100">
-                      <ChevronDown className="w-3 h-3 rotate-[-90deg]" />
-                    </button>
-                  </td>
+          {/* Description */}
+          <p className="text-sm text-gray-600">
+            Process PDFs using Einstein Generative AI and large language models
+            (LLMs) to extract the content and map it with the Health Cloud
+            objects and fields.
+          </p>
+
+          {/* Divider */}
+          <hr className="my-6 border-gray-200" />
+
+          {/* Sub-Section: Digitalize Document Content */}
+          <h3 className="text-base font-semibold text-gray-900 mb-2">
+            Digitalize Document Content
+          </h3>
+          <p className="text-sm text-gray-600 mb-6">
+            Create extraction templates to define the fields from which values
+            are extracted from a file. In the prompt description, provide
+            instructions for generative AI to identify the values of each
+            specified field. Based on your requirements, you can choose the
+            appropriate template to extract the relevant field values for each
+            specified field.
+          </p>
+
+          {/* Sub-Section: Extraction Templates */}
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            {/* Table Header Row */}
+            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-white">
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900">
+                  Extraction Templates
+                </h4>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  2 items · Sorted by Extraction Template Name
+                </p>
+              </div>
+              <button
+                onClick={() => setShowModal(true)}
+                className="bg-[#0176D3] text-white text-sm font-medium px-4 py-2 rounded hover:bg-[#015ba1] transition-colors"
+              >
+                Create Extraction Template
+              </button>
+            </div>
+
+            {/* Table */}
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="text-left text-xs font-medium text-gray-600 px-4 py-2.5">
+                    <div className="flex items-center gap-1 cursor-pointer">
+                      Extraction Template name
+                      <ChevronDown className="w-3 h-3" />
+                    </div>
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-600 px-4 py-2.5">
+                    <div className="flex items-center gap-1 cursor-pointer">
+                      Context Definition Name
+                      <ChevronDown className="w-3 h-3" />
+                    </div>
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-600 px-4 py-2.5">
+                    <div className="flex items-center gap-1 cursor-pointer">
+                      Context Mapping Name
+                      <ChevronDown className="w-3 h-3" />
+                    </div>
+                  </th>
+                  <th className="w-12"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {templates.map((template, index) => (
+                  <tr
+                    key={index}
+                    className="border-b border-gray-200 last:border-b-0 hover:bg-gray-50"
+                  >
+                    <td className="px-4 py-3">
+                      <Link
+                        href="/builder"
+                        className="text-sm text-[#0176D3] hover:underline"
+                      >
+                        {template.name}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-700">
+                      {template.contextDefinition}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-700">
+                      {template.contextMapping}
+                    </td>
+                    <td className="px-4 py-3">
+                      <button className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 text-gray-500 hover:bg-gray-100">
+                        <ChevronDown className="w-3 h-3 -rotate-90" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      {/* Modal Overlay */}
+      {/* ==================== MODAL ==================== */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* Backdrop */}
@@ -183,7 +193,7 @@ export default function Dashboard() {
             className="absolute inset-0 bg-black/50"
             onClick={() => setShowModal(false)}
           />
-          
+
           {/* Modal */}
           <div className="relative bg-white rounded-lg shadow-2xl w-full max-w-3xl mx-4 max-h-[90vh] overflow-hidden">
             {/* Modal Header */}
@@ -202,8 +212,10 @@ export default function Dashboard() {
             {/* Modal Body */}
             <div className="px-6 py-5 max-h-[60vh] overflow-y-auto">
               {/* Details Section */}
-              <h3 className="text-base font-semibold text-gray-900 mb-4">Details</h3>
-              
+              <h3 className="text-base font-semibold text-gray-900 mb-4">
+                Details
+              </h3>
+
               <div className="grid grid-cols-2 gap-6 mb-6">
                 {/* Template Name */}
                 <div>
@@ -249,15 +261,23 @@ export default function Dashboard() {
               </div>
 
               {/* Confidence Score Section */}
-              <h3 className="text-base font-semibold text-gray-900 mb-2">Confidence Score</h3>
+              <h3 className="text-base font-semibold text-gray-900 mb-2">
+                Confidence Score
+              </h3>
               <p className="text-sm text-gray-600 mb-4">
-                Set a confidence score range (minimum being 0) below which, extractions require manual review and define a low-confidence range to alert business users for validation.
+                Set a confidence score range (minimum being 0) below which,
+                extractions require manual review and define a low-confidence
+                range to alert business users for validation.
               </p>
 
               <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-gray-700">Low Confidence Range</span>
-                  <span className="text-sm font-medium text-gray-900">0-{confidenceScore}</span>
+                  <span className="text-sm text-gray-700">
+                    Low Confidence Range
+                  </span>
+                  <span className="text-sm font-medium text-gray-900">
+                    0-{confidenceScore}
+                  </span>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex-1 relative">
@@ -275,7 +295,9 @@ export default function Dashboard() {
                       min="0"
                       max="100"
                       value={confidenceScore}
-                      onChange={(e) => setConfidenceScore(Number(e.target.value))}
+                      onChange={(e) =>
+                        setConfidenceScore(Number(e.target.value))
+                      }
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
                     {/* Thumb indicator */}
