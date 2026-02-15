@@ -136,6 +136,7 @@ export default function BuilderPage() {
   const [llm, setLlm] = useState("GPT-4");
   const [description, setDescription] = useState("A document containing key clinical and demographic details used to refer a patient to another healthcare provider or specialist for further evaluation, treatment, or consultation.");
   const [selectedContext, setSelectedContext] = useState<string>("");
+  const [extractedData, setExtractedData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -168,6 +169,134 @@ export default function BuilderPage() {
     setPrompts((prev) => ({ ...prev, [id]: value }));
   };
 
+  // Simulate PDF extraction - generates different data based on file name
+  const extractDataFromPDF = (fileName: string): any => {
+    // Generate a hash-like value from filename to create consistent but different data
+    const hash = fileName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const seed = hash % 1000;
+    
+    // Generate different patient names based on file
+    const names = [
+      { first: "Baby", last: "Of Manisha Kantipudi" },
+      { first: "Ananya", last: "Mehta" },
+      { first: "Rajesh", last: "Kumar" },
+      { first: "Priya", last: "Sharma" },
+      { first: "Amit", last: "Patel" },
+    ];
+    const nameIndex = seed % names.length;
+    const patient = names[nameIndex];
+    
+    // Generate different dates
+    const dates = [
+      { birthdate: "2024-11-14", effectiveDate: "2024-11-14T16:28:00" },
+      { birthdate: "1985-03-15", effectiveDate: "2025-07-07T10:30:00" },
+      { birthdate: "1990-06-20", effectiveDate: "2025-01-15T14:45:00" },
+      { birthdate: "1978-12-05", effectiveDate: "2025-02-20T09:15:00" },
+      { birthdate: "1995-09-10", effectiveDate: "2025-03-10T11:20:00" },
+    ];
+    const dateIndex = (seed * 2) % dates.length;
+    const datesData = dates[dateIndex];
+    
+    // Generate different phone numbers
+    const phones = [
+      "+91-9876543210",
+      "+91-9876543211",
+      "+91-9876543212",
+      "+91-9876543213",
+      "+91-9876543214",
+    ];
+    const phone = phones[seed % phones.length];
+    
+    // Generate different addresses
+    const addresses = [
+      { street: "403, Prestige Harmony, Mahadevpura", city: "Bengaluru", state: "Karnataka", zip: "560048", country: "India" },
+      { street: "123 Main Street", city: "Mumbai", state: "Maharashtra", zip: "400001", country: "India" },
+      { street: "456 Park Avenue", city: "Delhi", state: "Delhi", zip: "110001", country: "India" },
+      { street: "789 Tech Park", city: "Hyderabad", state: "Telangana", zip: "500032", country: "India" },
+      { street: "321 Business District", city: "Pune", state: "Maharashtra", zip: "411001", country: "India" },
+    ];
+    const addrIndex = (seed * 3) % addresses.length;
+    const address = addresses[addrIndex];
+    
+    // Generate different test values
+    const testValues = [
+      { numeric: 0.46, text: "0.46", interpretation: "Normal", upper: 15.0 },
+      { numeric: 2.5, text: "2.5", interpretation: "Normal", upper: 10.0 },
+      { numeric: 8.3, text: "8.3", interpretation: "Normal", upper: 12.0 },
+      { numeric: 1.2, text: "1.2", interpretation: "Normal", upper: 5.0 },
+      { numeric: 5.7, text: "5.7", interpretation: "Normal", upper: 8.0 },
+    ];
+    const testIndex = (seed * 4) % testValues.length;
+    const test = testValues[testIndex];
+    
+    return {
+      Account: {
+        accountName: `${patient.first} ${patient.last}`,
+        firstName: patient.first,
+        lastName: patient.last,
+        gender: seed % 2 === 0 ? "Male" : "Female",
+        birthdate: datesData.birthdate,
+        phone: phone,
+        billingStreet: address.street,
+        billingCity: address.city,
+        billingState: address.state,
+        billingPostalCode: address.zip,
+        billingCountry: address.country,
+        status: "Active"
+      },
+      HealthCondition: {
+        problemName: seed % 2 === 0 ? "Congenital Adrenal Hyperplasia" : "Type 2 Diabetes",
+        severity: null,
+        conditionStatus: null,
+        type: null,
+        diagnosticStatus: null,
+        onsetStart: null,
+        onsetEnd: null,
+        HealthConditionCriteria: {
+          criteriaType: "Encounter Diagnosis",
+          HealthCondition: {
+            problemName: "Secondary Condition",
+            severity: null
+          }
+        }
+      },
+      CareObservation: {
+        name: `Test Result ${seed % 10 + 1}`,
+        observer: "Account",
+        observationStatus: "Final",
+        category: "Vital-Signs",
+        numericValue: test.numeric,
+        observedValueText: test.text,
+        interpretation: test.interpretation,
+        lowerBaselineValue: null,
+        upperBaselineValue: test.upper,
+        baselineUnit: "µIU/mL",
+        baselineValueText: `< ${test.upper}`,
+        effectiveDateTime: datesData.effectiveDate,
+        DiagnosticSummary: {
+          name: "Medical Test Panel",
+          status: "Final",
+          conclusion: "All markers within normal range"
+        }
+      },
+      Specimen: {
+        name: "Blood Sample",
+        status: "Available",
+        receivedDate: datesData.effectiveDate,
+        collectionStartDate: datesData.effectiveDate,
+        collectionDuration: 15.0,
+        collectionQuantity: null,
+        fastingDuration: null
+      },
+      Case: {
+        origin: seed % 3 === 0 ? "Web" : seed % 3 === 1 ? "Phone" : "Email",
+        status: "New",
+        subject: `Medical Consultation - ${patient.first} ${patient.last}`,
+        contact: `${patient.first} ${patient.last}`
+      }
+    };
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type === "application/pdf") {
@@ -175,7 +304,12 @@ export default function BuilderPage() {
       const url = URL.createObjectURL(file);
       setPdfUrl(url);
       setIsProcessing(true);
+      setShowResponse(false); // Reset response when new file is uploaded
+      
+      // Simulate extraction process
       setTimeout(() => {
+        const extracted = extractDataFromPDF(file.name);
+        setExtractedData(extracted);
         setIsProcessing(false);
         setIsUploaded(true);
       }, 1500);
@@ -186,6 +320,7 @@ export default function BuilderPage() {
     setIsUploaded(false);
     setShowResponse(false);
     setFileName("");
+    setExtractedData(null);
     if (pdfUrl) {
       URL.revokeObjectURL(pdfUrl);
       setPdfUrl(null);
@@ -314,6 +449,7 @@ export default function BuilderPage() {
             handleFileSelect={handleFileSelect}
             handleClearUpload={handleClearUpload}
             selectedContext={selectedContext}
+            extractedData={extractedData}
           />
         )}
       </div>
@@ -397,47 +533,70 @@ function ConfigurationView({
       {/* Main Content - flat design, no extra padding */}
       <div className="flex-1 min-w-0 overflow-y-auto bg-gray-100 p-4">
         <div className="w-full">
-          {/* Extraction Template Details */}
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Extraction Template Details</h2>
-          
-          <div className="bg-white p-5 mb-4">
-            {/* Template Name & LLM Row */}
-            <div className="grid grid-cols-2 gap-6 mb-5">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs text-gray-500">Template Name</label>
-                  <button className="p-1 hover:bg-gray-100 rounded">
-                    <Pencil className="w-4 h-4 text-gray-400" />
-                  </button>
-                </div>
-                <p className="text-sm text-gray-900">{templateName}</p>
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs text-gray-500">LLM</label>
-                  <button className="p-1 hover:bg-gray-100 rounded">
-                    <Pencil className="w-4 h-4 text-gray-400" />
-                  </button>
-                </div>
-                <p className="text-sm text-gray-900">{llm}</p>
-              </div>
+          {/* Empty State - illustration only when no context is selected */}
+          {!selectedContext && (
+            <div className="flex flex-col items-center justify-center h-full text-center p-10">
+              {/* Blue Wireframe Desert Illustration */}
+              <svg
+                width="300"
+                height="200"
+                viewBox="0 0 300 200"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="mb-6 opacity-75"
+              >
+                <path
+                  d="M40 160 H260 M70 160 V120 M70 120 V100 M70 120 H50 V110 M70 100 H90 V110 M200 160 V130 M200 130 H180 V140 M200 130 V110 M200 110 H220 V120"
+                  stroke="#89c6f5"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <circle cx="230" cy="50" r="15" stroke="#89c6f5" strokeWidth="2" />
+                <path d="M120 160 L140 140 L160 160" stroke="#89c6f5" strokeWidth="2" />
+                <path d="M10 160 H290" stroke="#89c6f5" strokeWidth="2" strokeDasharray="4 4" />
+              </svg>
+              <p className="text-sm text-slate-500 text-center max-w-md">
+                Select Context Definition and mapping to view the Fields
+              </p>
             </div>
+          )}
 
-            {/* Description */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-xs text-gray-500">Description</label>
-                <button className="p-1 hover:bg-gray-100 rounded">
-                  <Pencil className="w-4 h-4 text-gray-400" />
-                </button>
-              </div>
-              <p className="text-sm text-gray-900">{description}</p>
-            </div>
-          </div>
-
-          {/* Document (Attribute) Fields - flat design - Only show if context is selected */}
+          {/* Extraction Template Details + Document Fields - only when context is selected */}
           {selectedContext && (
-            <div className="bg-white overflow-hidden">
+            <>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Extraction Template Details</h2>
+              <div className="bg-white p-5 mb-4">
+                <div className="grid grid-cols-2 gap-6 mb-5">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs text-gray-500">Template Name</label>
+                      <button className="p-1 hover:bg-gray-100 rounded">
+                        <Pencil className="w-4 h-4 text-gray-400" />
+                      </button>
+                    </div>
+                    <p className="text-sm text-gray-900">{templateName}</p>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs text-gray-500">LLM</label>
+                      <button className="p-1 hover:bg-gray-100 rounded">
+                        <Pencil className="w-4 h-4 text-gray-400" />
+                      </button>
+                    </div>
+                    <p className="text-sm text-gray-900">{llm}</p>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs text-gray-500">Description</label>
+                    <button className="p-1 hover:bg-gray-100 rounded">
+                      <Pencil className="w-4 h-4 text-gray-400" />
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-900">{description}</p>
+                </div>
+              </div>
+              <div className="bg-white overflow-hidden">
               {/* Table Header */}
               <div className="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
                 <div className="px-4 py-3 text-sm font-medium text-gray-700 flex items-center gap-2">
@@ -460,7 +619,8 @@ function ConfigurationView({
                   toggleExpanded={toggleFieldExpanded}
                 />
               ))}
-            </div>
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -544,6 +704,7 @@ interface PlaygroundViewProps {
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleClearUpload: () => void;
   selectedContext: string;
+  extractedData: any;
 }
 
 function PlaygroundView({
@@ -567,6 +728,7 @@ function PlaygroundView({
   handleFileSelect,
   handleClearUpload,
   selectedContext,
+  extractedData,
 }: PlaygroundViewProps) {
   return (
     <div className="h-full grid grid-cols-3 overflow-hidden">
@@ -775,9 +937,9 @@ function PlaygroundView({
         {/* Scrollable Body */}
         <div className="flex-1 min-h-0 overflow-y-auto p-5">
           {extractedTab === "json" ? (
-            <JsonView showResponse={showResponse} entityType={selectedEntity?.type || "Account"} />
+            <JsonView showResponse={showResponse} entityType={selectedEntity?.type || "Account"} extractedData={extractedData} />
           ) : (
-            <FormView showResponse={showResponse} entityType={selectedEntity?.type || "Account"} />
+            <FormView showResponse={showResponse} entityType={selectedEntity?.type || "Account"} extractedData={extractedData} />
           )}
         </div>
       </div>
@@ -954,127 +1116,165 @@ function EmptyStateMessage() {
 interface FormViewProps {
   showResponse: boolean;
   entityType: string;
+  extractedData: any;
 }
 
-function FormView({ showResponse, entityType }: FormViewProps) {
+function FormView({ showResponse, entityType, extractedData }: FormViewProps) {
   // Show empty state if no response yet
   if (!showResponse) {
     return <EmptyStateMessage />;
   }
 
+  // Helper to format date
+  const formatDate = (dateStr: string | null | undefined) => {
+    if (!dateStr) return "";
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return "";
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return "";
+    }
+  };
+
+  // Helper to format datetime
+  const formatDateTime = (dateStr: string | null | undefined) => {
+    if (!dateStr) return { date: "", time: "" };
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return { date: "", time: "" };
+      return {
+        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        time: date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+      };
+    } catch {
+      return { date: "", time: "" };
+    }
+  };
+
+  const data = extractedData || {};
+
   switch (entityType) {
     case "Account":
+      const account = data.Account || {};
       return (
         <div className="space-y-5">
           <h4 className="text-xl font-semibold text-gray-900">Account</h4>
           <div className="grid grid-cols-2 gap-4">
-            <FormField label="Account Name" value="Baby Of Manisha Kantipudi" required />
-            <FormDropdown label="Status" value="Active" options={["Active", "Inactive"]} />
+            <FormField label="Account Name" value={account.accountName || ""} required />
+            <FormDropdown label="Status" value={account.status || "Active"} options={["Active", "Inactive"]} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FormField label="Phone" value="+91-9876543210" />
+            <FormField label="Phone" value={account.phone || ""} />
             <FormField label="Fax" value="" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Website" value="" />
-            <FormField label="Billing Street" value="403, Prestige Harmony, Mahadevpura" />
+            <FormField label="Billing Street" value={account.billingStreet || ""} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FormField label="Billing City" value="Bengaluru" />
-            <FormField label="Billing State" value="Karnataka" />
+            <FormField label="Billing City" value={account.billingCity || ""} />
+            <FormField label="Billing State" value={account.billingState || ""} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FormField label="Billing Zip" value="560048" />
-            <FormField label="Billing Country" value="India" />
+            <FormField label="Billing Zip" value={account.billingPostalCode || ""} />
+            <FormField label="Billing Country" value={account.billingCountry || ""} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FormField label="First Name" value="Baby" />
-            <FormField label="Last Name" value="Of Manisha Kantipudi" />
+            <FormField label="First Name" value={account.firstName || ""} />
+            <FormField label="Last Name" value={account.lastName || ""} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FormDateTimeField label="Birthdate" dateValue="Nov 14, 2024" timeValue="" />
-            <FormDropdown label="Gender" value="Male" options={["Male", "Female", "Other"]} />
+            <FormDateTimeField label="Birthdate" dateValue={formatDate(account.birthdate)} timeValue="" />
+            <FormDropdown label="Gender" value={account.gender || ""} options={["Male", "Female", "Other"]} />
           </div>
         </div>
       );
 
     case "CareObservation":
+      const observation = data.CareObservation || {};
+      const obsDateTime = formatDateTime(observation.effectiveDateTime);
       return (
         <div className="space-y-5">
           <h4 className="text-xl font-semibold text-gray-900">CareObservation</h4>
           <div className="grid grid-cols-2 gap-4">
-            <FormField label="Name" value="Congenital Hypothyroidism (TSH)" required />
-            <FormSearchField label="Observer" value="" type="Account" />
+            <FormField label="Name" value={observation.name || ""} required />
+            <FormSearchField label="Observer" value={observation.observer || ""} type="Account" />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FormDropdown label="Observation Status" value="Final" options={["Final", "Preliminary", "Amended"]} required />
-            <FormDropdown label="Category" value="Vital-Signs" options={["Vital-Signs", "Laboratory", "Imaging"]} />
+            <FormDropdown label="Observation Status" value={observation.observationStatus || "Final"} options={["Final", "Preliminary", "Amended"]} required />
+            <FormDropdown label="Category" value={observation.category || "Vital-Signs"} options={["Vital-Signs", "Laboratory", "Imaging"]} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FormField label="Numeric Value" value="0.460000" />
-            <FormField label="Observed Value Text" value="0.46" />
+            <FormField label="Numeric Value" value={observation.numericValue?.toString() || ""} />
+            <FormField label="Observed Value Text" value={observation.observedValueText || ""} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FormDropdown label="Value Interpretation" value="Normal" options={["Normal", "Abnormal", "Critical"]} />
-            <FormField label="Lower Baseline Value" value="" />
+            <FormDropdown label="Value Interpretation" value={observation.interpretation || "Normal"} options={["Normal", "Abnormal", "Critical"]} />
+            <FormField label="Lower Baseline Value" value={observation.lowerBaselineValue?.toString() || ""} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FormField label="Upper Baseline Value" value="15.00" />
-            <FormSearchField label="Baseline Unit" value="" />
+            <FormField label="Upper Baseline Value" value={observation.upperBaselineValue?.toString() || ""} />
+            <FormSearchField label="Baseline Unit" value={observation.baselineUnit || ""} />
           </div>
-          <FormField label="Baseline Value Text" value="< 15" />
-          <FormDateTimeField label="Effective Date and Time" dateValue="Nov 14, 2024" timeValue="4:28 PM" hasInfo />
+          <FormField label="Baseline Value Text" value={observation.baselineValueText || ""} />
+          <FormDateTimeField label="Effective Date and Time" dateValue={obsDateTime.date} timeValue={obsDateTime.time} hasInfo />
         </div>
       );
 
     case "Specimen":
+      const specimen = data.Specimen || {};
+      const receivedDateTime = formatDateTime(specimen.receivedDate);
+      const collectionDateTime = formatDateTime(specimen.collectionStartDate);
       return (
         <div className="space-y-5">
           <h4 className="text-xl font-semibold text-gray-900">Specimen</h4>
           <div className="grid grid-cols-2 gap-4">
-            <FormField label="Name" value="Blood Sample" required />
-            <FormDropdown label="Status" value="Available" options={["Available", "Unavailable"]} />
+            <FormField label="Name" value={specimen.name || ""} required />
+            <FormDropdown label="Status" value={specimen.status || "Available"} options={["Available", "Unavailable"]} />
           </div>
-          <FormDateTimeField label="Received Date" dateValue="Nov 14, 2024" timeValue="4:43 PM" />
-          <FormDateTimeField label="Collection Start Date" dateValue="Nov 14, 2024" timeValue="4:28 PM" />
+          <FormDateTimeField label="Received Date" dateValue={receivedDateTime.date} timeValue={receivedDateTime.time} />
+          <FormDateTimeField label="Collection Start Date" dateValue={collectionDateTime.date} timeValue={collectionDateTime.time} />
           <div className="grid grid-cols-2 gap-4">
-            <FormField label="Collection Duration" value="15.00000" />
-            <FormField label="Collection Quantity" value="" />
+            <FormField label="Collection Duration" value={specimen.collectionDuration?.toString() || ""} />
+            <FormField label="Collection Quantity" value={specimen.collectionQuantity?.toString() || ""} />
           </div>
-          <FormField label="Fasting Duration" value="" />
+          <FormField label="Fasting Duration" value={specimen.fastingDuration?.toString() || ""} />
         </div>
       );
 
     case "HealthCondition":
     case "HealthConditionCriteria":
+      const healthCondition = data.HealthCondition || {};
       return (
         <div className="space-y-5">
           <h4 className="text-xl font-semibold text-gray-900">HealthCondition</h4>
           <div className="grid grid-cols-2 gap-4">
-            <FormDropdown label="Severity" value="" options={["Mild", "Moderate", "Severe"]} />
-            <FormDropdown label="Condition Status" value="" options={["Active", "Inactive", "Resolved"]} />
+            <FormDropdown label="Severity" value={healthCondition.severity || ""} options={["Mild", "Moderate", "Severe"]} />
+            <FormDropdown label="Condition Status" value={healthCondition.conditionStatus || ""} options={["Active", "Inactive", "Resolved"]} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FormDropdown label="Type" value="" options={["Problem", "Diagnosis", "Symptom"]} />
-            <FormDropdown label="Diagnostic Status" value="" options={["Confirmed", "Unconfirmed", "Provisional"]} />
+            <FormDropdown label="Type" value={healthCondition.type || ""} options={["Problem", "Diagnosis", "Symptom"]} />
+            <FormDropdown label="Diagnostic Status" value={healthCondition.diagnosticStatus || ""} options={["Confirmed", "Unconfirmed", "Provisional"]} />
           </div>
-          <FormDateTimeField label="Onset Start" dateValue="" timeValue="" />
-          <FormDateTimeField label="Onset End" dateValue="" timeValue="" />
-          <FormField label="Problem Name" value="Congenital Adrenal Hyperplasia" />
+          <FormDateTimeField label="Onset Start" dateValue={formatDate(healthCondition.onsetStart)} timeValue="" />
+          <FormDateTimeField label="Onset End" dateValue={formatDate(healthCondition.onsetEnd)} timeValue="" />
+          <FormField label="Problem Name" value={healthCondition.problemName || ""} />
           <FormSearchField label="Problem Def" value="" />
         </div>
       );
 
     case "Case":
+      const caseData = data.Case || {};
       return (
         <div className="space-y-5">
           <h4 className="text-xl font-semibold text-gray-900">Case</h4>
           <div className="grid grid-cols-2 gap-4">
-            <FormDropdown label="Origin" value="Web" options={["Web", "Phone", "Email"]} />
-            <FormDropdown label="Status" value="New" options={["New", "Working", "Closed"]} />
+            <FormDropdown label="Origin" value={caseData.origin || "Web"} options={["Web", "Phone", "Email"]} />
+            <FormDropdown label="Status" value={caseData.status || "New"} options={["New", "Working", "Closed"]} />
           </div>
-          <FormField label="Subject" value="Newborn Screening - Baby Of Manisha Kantipudi" />
-          <FormSearchField label="Contact" value="Baby Of Manisha Kantipudi" type="Account" />
+          <FormField label="Subject" value={caseData.subject || ""} />
+          <FormSearchField label="Contact" value={caseData.contact || ""} type="Account" />
         </div>
       );
 
@@ -1090,14 +1290,14 @@ function FormView({ showResponse, entityType }: FormViewProps) {
 }
 
 // ========== JSON VIEW ==========
-function JsonView({ showResponse, entityType }: FormViewProps) {
+function JsonView({ showResponse, entityType, extractedData }: FormViewProps) {
   // Show empty state if no response yet
   if (!showResponse) {
     return <EmptyStateMessage />;
   }
 
-  // Full extracted data payload - "Baby of Manisha" dataset
-  const allExtractedData = {
+  // Use extracted data if available, otherwise fallback to default
+  const allExtractedData = extractedData || {
     Account: {
       accountName: "Baby Of Manisha Kantipudi",
       firstName: "Baby",
