@@ -119,6 +119,379 @@ const attributeFields: AttributeField[] = [
   { id: "lorem-ipsum", name: "Lorem Ipsum Label", description: "Label" },
 ];
 
+// Case Intake data model
+interface CaseIntakeEntity {
+  entity: string;
+  description: string;
+  /** Entity-level prompt (defaults to description when not set) */
+  prompt?: string;
+  fields: { name: string; prompt: string }[];
+}
+
+const caseIntakeData: CaseIntakeEntity[] = [
+  {
+    entity: "Account",
+    description: "The lab report contains information about the doctor and patient. The Account object represents both.",
+    prompt: "The lab report contains information about the doctor and patient. The Account object represents both.",
+    fields: [
+      { name: "BillingCity", prompt: "The billing city associated with the account." },
+      { name: "BillingStreet", prompt: "The billing street address." },
+      { name: "BillingCountry", prompt: "The billing country." },
+      { name: "BillingPostalCode", prompt: "The billing postal code." },
+      { name: "BillingState", prompt: "The billing state." },
+      { name: "FirstName", prompt: "The first name of the person." },
+      { name: "LastName", prompt: "The last name of the person." },
+      { name: "Salutation", prompt: "The salutation (Mr, Mrs, Dr, etc)." },
+      { name: "Website", prompt: "The website URL." },
+      { name: "Fax", prompt: "The fax number." },
+      { name: "Birthdate", prompt: "The date of birth (YYYY-MM-DD)." },
+      { name: "Gender", prompt: "The gender identity." },
+      { name: "Phone", prompt: "The primary phone number." },
+    ],
+  },
+  {
+    entity: "CareObservation",
+    description: "Observations and measurements taken during care.",
+    prompt: "Observations and measurements taken during care.",
+    fields: [
+      { name: "AccountReference", prompt: "Reference ID to the Account." },
+      { name: "ValueInterpretation", prompt: "Interpretation of the value (High, Low, Normal)." },
+      { name: "ObserverReference", prompt: "Reference to the person observing." },
+      { name: "CaseReference", prompt: "Reference ID to the Case." },
+      { name: "EffectiveDateTime", prompt: "The date/time the observation was effective." },
+      { name: "BaselineValueText", prompt: "Text description of the baseline value." },
+      { name: "BaselineUnit", prompt: "Unit of measure for the baseline." },
+      { name: "Category", prompt: "The category of observation." },
+      { name: "ObservedStatus", prompt: "Status of the observation." },
+      { name: "Name", prompt: "Name of the observation." },
+      { name: "NumericValue", prompt: "Numeric result value." },
+      { name: "ObservedValueText", prompt: "Text result value." },
+      { name: "UpperBaselineValue", prompt: "Upper limit of the baseline range." },
+      { name: "LowerBaselineValue", prompt: "Lower limit of the baseline range." },
+    ],
+  },
+  {
+    entity: "Case",
+    description: "The core case file.",
+    prompt: "The core case file.",
+    fields: [
+      { name: "AccountReference", prompt: "Reference ID to the Account." },
+      { name: "Origin", prompt: "Origin of the case (Phone, Web, etc)." },
+    ],
+  },
+  {
+    entity: "DiagnosticSummary",
+    description: "Summary of diagnostic findings.",
+    prompt: "Summary of diagnostic findings.",
+    fields: [
+      { name: "AccountReference", prompt: "Reference ID to the Account." },
+      { name: "AuthenticatorReference", prompt: "Reference to the authenticator." },
+      { name: "CaseReference", prompt: "Reference ID to the Case." },
+      { name: "Category", prompt: "Category of the summary." },
+      { name: "Status", prompt: "Status of the summary." },
+      { name: "AttachmentLanguage", prompt: "Language of the attachment." },
+      { name: "EffectiveEndDateTime", prompt: "End date/time of validity." },
+      { name: "EffectiveStartDateTime", prompt: "Start date/time of validity." },
+      { name: "IssuedDateTime", prompt: "Date/time issued." },
+      { name: "ImageUrl1", prompt: "URL for Image 1." },
+      { name: "ImageComments3", prompt: "Comments for Image 3." },
+      { name: "ImageComments2", prompt: "Comments for Image 2." },
+      { name: "ImageComments1", prompt: "Comments for Image 1." },
+    ],
+  },
+  {
+    entity: "DiagnosticSummaryDetail",
+    description: "Detailed line items for the diagnostic summary.",
+    prompt: "Detailed line items for the diagnostic summary.",
+    fields: [
+      { name: "SpecimenReference", prompt: "Reference to the Specimen." },
+      { name: "CareObservationReference", prompt: "Reference to the CareObservation." },
+      { name: "DiagnosticSummaryReference", prompt: "Reference to the parent DiagnosticSummary." },
+      { name: "DetailType", prompt: "Type of detail." },
+    ],
+  },
+  {
+    entity: "HealthCondition",
+    description: "Conditions or symptoms identified.",
+    prompt: "Conditions or symptoms identified.",
+    fields: [
+      { name: "CaseReference", prompt: "Reference ID to the Case." },
+      { name: "AccountReference", prompt: "Reference ID to the Account." },
+      { name: "Type", prompt: "Type of condition." },
+      { name: "AbatementStartDateTime", prompt: "Start date of abatement." },
+      { name: "AbatementEndDateTime", prompt: "End date of abatement." },
+      { name: "ProblemDefinition", prompt: "Definition of the problem." },
+      { name: "DiagnosticStatus", prompt: "Diagnostic status." },
+      { name: "ConditionStatus", prompt: "Condition status." },
+      { name: "Severity", prompt: "Severity level." },
+      { name: "RecordCreationDateTime", prompt: "Date record was created." },
+      { name: "ProblemName", prompt: "Name of the problem." },
+      { name: "ProblemDescription", prompt: "Description of the problem." },
+      { name: "OnsetStartDateTime", prompt: "Start of onset." },
+      { name: "OnsetEndDateTime", prompt: "End of onset." },
+      { name: "ExtlProblemDefIdentifier", prompt: "External problem identifier." },
+    ],
+  },
+  {
+    entity: "Specimen",
+    description: "Biological specimens collected.",
+    prompt: "Biological specimens collected.",
+    fields: [
+      { name: "Name", prompt: "Name of the specimen." },
+      { name: "CaseReference", prompt: "Reference ID to the Case." },
+      { name: "AccountReference", prompt: "Reference ID to the Account." },
+      { name: "Status", prompt: "Status of the specimen." },
+      { name: "GroupingMethod", prompt: "Method of grouping." },
+      { name: "ReceivedDate", prompt: "Date received." },
+      { name: "FastingDuration", prompt: "Duration of fasting." },
+      { name: "CollectionQuantity", prompt: "Quantity collected." },
+      { name: "CollectionDuration", prompt: "Duration of collection." },
+      { name: "CollectionEndDate", prompt: "End date of collection." },
+      { name: "CollectionStartDate", prompt: "Start date of collection." },
+    ],
+  },
+];
+
+function caseIntakeToEntityNodes(): EntityNode[] {
+  return caseIntakeData.map(({ entity, description }) => ({
+    id: entity,
+    name: entity,
+    type: entity,
+    prompt: description,
+  }));
+}
+
+function caseIntakeToAttributeFields(): AttributeField[] {
+  return caseIntakeData.map(({ entity, description, fields }) => ({
+    id: entity,
+    name: entity,
+    description,
+    children: fields.map((f) => ({ id: `${entity}-${f.name}`, name: f.name, description: f.prompt })),
+  }));
+}
+
+// Recursive nested tree (up to 4 levels) for Playground
+interface NestedEntityNode {
+  id: string;
+  name: string;
+  prompt?: string;
+  children?: NestedEntityNode[];
+  level: number;
+}
+
+const fullCaseIntakeTree: NestedEntityNode[] = [
+  {
+    id: "case-root",
+    name: "Case",
+    level: 0,
+    prompt: "The core case file related to the patient's report.",
+    children: [
+      { id: "case-origin", name: "Origin", level: 1, prompt: "The origin or source of the case (e.g., Web, Phone, Email)." },
+      { id: "case-account-ref", name: "AccountReference", level: 1, prompt: "Reference to the Account associated with this Case." },
+    ],
+  },
+  {
+    id: "account-root",
+    name: "Account",
+    level: 0,
+    prompt: "The lab report contains information about the doctor and patient. The Account object represents both.",
+    children: [
+      {
+        id: "acc-address",
+        name: "Address Details",
+        level: 1,
+        prompt: "Extract all billing address components.",
+        children: [
+          { id: "acc-city", name: "BillingCity", level: 2, prompt: "The city associated with the Account." },
+          { id: "acc-street", name: "BillingStreet", level: 2, prompt: "The street address associated with the Account." },
+          { id: "acc-country", name: "BillingCountry", level: 2, prompt: "The country associated with the Account." },
+          { id: "acc-zip", name: "BillingPostalCode", level: 2, prompt: "The ZIP or postal code." },
+          { id: "acc-state", name: "BillingState", level: 2, prompt: "The state associated with the Account." },
+        ],
+      },
+      {
+        id: "acc-demo",
+        name: "Demographics",
+        level: 1,
+        prompt: "Personal demographic details.",
+        children: [
+          { id: "acc-fname", name: "FirstName", level: 2, prompt: "The first name of the individual." },
+          { id: "acc-lname", name: "LastName", level: 2, prompt: "The last name of the individual." },
+          { id: "acc-salutation", name: "Salutation", level: 2, prompt: "The salutation (e.g., Mr., Mrs., Dr.)." },
+          { id: "acc-dob", name: "Birthdate", level: 2, prompt: "The date of birth of the individual." },
+          { id: "acc-gender", name: "Gender", level: 2, prompt: "The gender of the individual." },
+        ],
+      },
+      { id: "acc-phone", name: "Phone", level: 1, prompt: "The primary phone number for the account." },
+      { id: "acc-website", name: "Website", level: 1, prompt: "The website URL associated with the account." },
+      { id: "acc-fax", name: "Fax", level: 1, prompt: "The fax number associated with the account." },
+    ],
+  },
+  {
+    id: "care-obs-root",
+    name: "CareObservation",
+    level: 0,
+    prompt: "Represents the observed values for care metrics in the lab report.",
+    children: [
+      { id: "co-val-interp", name: "ValueInterpretation", level: 1, prompt: "Interpretation of the observed value (e.g., High, Low, Normal)." },
+      { id: "co-eff-date", name: "EffectiveDateTime", level: 1, prompt: "The date and time when the observation was relevant." },
+      { id: "co-baseline-text", name: "BaselineValueText", level: 1, prompt: "Text description of the baseline value." },
+      { id: "co-baseline-unit", name: "BaselineUnit", level: 1, prompt: "The unit of measure for the baseline value." },
+      { id: "co-category", name: "Category", level: 1, prompt: "The category of the observation." },
+      { id: "co-status", name: "ObservedStatus", level: 1, prompt: "The status of the observation (e.g., final, preliminary)." },
+      { id: "co-name", name: "Name", level: 1, prompt: "The name of the observation." },
+      { id: "co-num-val", name: "NumericValue", level: 1, prompt: "The numeric result of the observation." },
+      { id: "co-text-val", name: "ObservedValueText", level: 1, prompt: "The text result of the observation." },
+      { id: "co-upper", name: "UpperBaselineValue", level: 1, prompt: "The upper limit of the normal range." },
+      { id: "co-lower", name: "LowerBaselineValue", level: 1, prompt: "The lower limit of the normal range." },
+    ],
+  },
+  {
+    id: "diag-sum-root",
+    name: "DiagnosticSummary",
+    level: 0,
+    prompt: "Details of the patient for which the lab report is generated.",
+    children: [
+      { id: "ds-category", name: "Category", level: 1, prompt: "The category of the diagnostic summary." },
+      { id: "ds-status", name: "Status", level: 1, prompt: "The status of the summary." },
+      { id: "ds-issued", name: "IssuedDateTime", level: 1, prompt: "The date and time the summary was issued." },
+      { id: "ds-start", name: "EffectiveStartDateTime", level: 1, prompt: "The start time of the effective period." },
+      { id: "ds-end", name: "EffectiveEndDateTime", level: 1, prompt: "The end time of the effective period." },
+      {
+        id: "ds-images",
+        name: "Image References",
+        level: 1,
+        prompt: "Attached images and comments.",
+        children: [
+          { id: "ds-img1", name: "ImageUrl1", level: 2, prompt: "URL or reference to the first image." },
+          { id: "ds-comm1", name: "ImageComments1", level: 2, prompt: "Comments regarding the first image." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "health-cond-root",
+    name: "HealthCondition",
+    level: 0,
+    prompt: "Represents a clinical condition, problem, symptom, or finding.",
+    children: [
+      { id: "hc-prob-name", name: "ProblemName", level: 1, prompt: "The name of the problem or condition." },
+      { id: "hc-prob-desc", name: "ProblemDescription", level: 1, prompt: "A detailed description of the problem." },
+      { id: "hc-sev", name: "Severity", level: 1, prompt: "The severity of the condition (e.g., Mild, Severe)." },
+      { id: "hc-status", name: "ConditionStatus", level: 1, prompt: "The clinical status of the condition." },
+      { id: "hc-onset-start", name: "OnsetStartDateTime", level: 1, prompt: "When the condition first started." },
+    ],
+  },
+  {
+    id: "spec-root",
+    name: "Specimen",
+    level: 0,
+    prompt: "Represents a sample used for analysis.",
+    children: [
+      { id: "sp-name", name: "Name", level: 1, prompt: "The name or label of the specimen." },
+      { id: "sp-status", name: "Status", level: 1, prompt: "The status of the specimen." },
+      { id: "sp-received", name: "ReceivedDate", level: 1, prompt: "The date the specimen was received." },
+      { id: "sp-fasting", name: "FastingDuration", level: 1, prompt: "Duration of fasting before collection." },
+    ],
+  },
+];
+
+function flattenNestedNodes(nodes: NestedEntityNode[]): Record<string, string> {
+  let result: Record<string, string> = {};
+  nodes.forEach((node) => {
+    if (node.prompt) result[node.id] = node.prompt;
+    if (node.children) result = { ...result, ...flattenNestedNodes(node.children) };
+  });
+  return result;
+}
+
+// Recursive tree item for nested Case Intake (SLDS selection styling)
+interface TreeItemProps {
+  node: NestedEntityNode;
+  selectedNodeId: string | null;
+  onSelect: (id: string) => void;
+  expandedIds: string[];
+  onToggle: (id: string) => void;
+  prompts: Record<string, string>;
+  onPromptChange: (id: string, value: string) => void;
+}
+
+function TreeItem({
+  node,
+  selectedNodeId,
+  onSelect,
+  expandedIds,
+  onToggle,
+  prompts,
+  onPromptChange,
+}: TreeItemProps) {
+  const hasChildren = node.children && node.children.length > 0;
+  const isExpanded = expandedIds.includes(node.id);
+  const isSelected = selectedNodeId === node.id;
+  const showPrompt = isExpanded || isSelected;
+
+  const handleRowClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect(node.id);
+    onToggle(node.id);
+  };
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={handleRowClick}
+        style={{ paddingLeft: `${node.level * 1.5}rem` }}
+        className={`w-full flex items-center text-left py-2 px-1 rounded-sm transition-colors ${
+          isSelected
+            ? "bg-[#f0f8ff] text-[#0176d3] border-l-[3px] border-[#0176d3]"
+            : "hover:bg-gray-50 text-slate-700"
+        }`}
+      >
+        <span className="mr-2 flex-shrink-0 text-slate-400">
+          {hasChildren ? (
+            isExpanded ? (
+              <ChevronDown className="w-4 h-4" />
+            ) : (
+              <ChevronRight className="w-4 h-4" />
+            )
+          ) : (
+            <span className="w-4 inline-block" />
+          )}
+        </span>
+        <span className="text-sm font-medium">{node.name}</span>
+      </button>
+      {showPrompt && (
+        <div
+          style={{ paddingLeft: `${node.level * 1.5 + 1}rem` }}
+          className="pb-3 pr-2"
+        >
+          <label className="block text-xs font-medium text-slate-500 mb-1">Instruction</label>
+          <textarea
+            className="w-full text-sm p-2 border border-gray-300 rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none resize-none bg-white"
+            rows={2}
+            value={prompts[node.id] ?? node.prompt ?? ""}
+            onChange={(e) => onPromptChange(node.id, e.target.value)}
+          />
+        </div>
+      )}
+      {hasChildren && isExpanded &&
+        node.children!.map((child) => (
+          <TreeItem
+            key={child.id}
+            node={child}
+            selectedNodeId={selectedNodeId}
+            onSelect={onSelect}
+            expandedIds={expandedIds}
+            onToggle={onToggle}
+            prompts={prompts}
+            onPromptChange={onPromptChange}
+          />
+        ))}
+    </div>
+  );
+}
+
 export default function BuilderPage() {
   // State persists across tab switches
   const [activeTab, setActiveTab] = useState<ActiveTab>("configuration");
@@ -139,19 +512,32 @@ export default function BuilderPage() {
   const [extractedData, setExtractedData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const initPromptsFromNodes = (nodes: EntityNode[]): Record<string, string> => {
+    let result: Record<string, string> = {};
+    nodes.forEach((node) => {
+      result[node.id] = node.prompt;
+      if (node.children) {
+        result = { ...result, ...initPromptsFromNodes(node.children) };
+      }
+    });
+    return result;
+  };
+
   useEffect(() => {
-    const initPrompts = (nodes: EntityNode[]): Record<string, string> => {
-      let result: Record<string, string> = {};
-      nodes.forEach((node) => {
-        result[node.id] = node.prompt;
-        if (node.children) {
-          result = { ...result, ...initPrompts(node.children) };
-        }
-      });
-      return result;
-    };
-    setPrompts(initPrompts(entityData));
-  }, []);
+    if (selectedContext === "Case Intake Form") {
+      setPrompts(flattenNestedNodes(fullCaseIntakeTree));
+      setExpandedIds(fullCaseIntakeTree.length > 0 ? [fullCaseIntakeTree[0].id] : []);
+      setSelectedId(fullCaseIntakeTree.length > 0 ? fullCaseIntakeTree[0].id : "");
+    } else if (selectedContext === "PatientReferralDocument") {
+      setPrompts(initPromptsFromNodes(entityData));
+      setExpandedIds(["Account", "HealthCondition", "CareObservation", "HealthConditionCriteria"]);
+      setSelectedId("Account");
+    } else {
+      setPrompts({});
+      setExpandedIds([]);
+      setSelectedId("");
+    }
+  }, [selectedContext]);
 
   useEffect(() => {
     if (!isUploaded) {
@@ -159,10 +545,21 @@ export default function BuilderPage() {
     }
   }, [isUploaded]);
 
+  const currentEntityData =
+    selectedContext === "Case Intake Form" ? caseIntakeToEntityNodes() : entityData;
+  const currentAttributeFields =
+    selectedContext === "Case Intake Form" ? caseIntakeToAttributeFields() : attributeFields;
+
+  // Multi-select expansion: toggle only this node; other open nodes stay open.
+  // - If id is in expandedIds → remove it (collapse). If not → add it (expand).
+  // Example: Click Account → ['account-root']; Click Case → ['account-root', 'case-root']; Click Account again → ['case-root'].
   const toggleExpanded = (id: string) => {
-    setExpandedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+    setExpandedIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((x) => x !== id);
+      }
+      return [...prev, id];
+    });
   };
 
   const updatePrompt = (id: string, value: string) => {
@@ -341,7 +738,7 @@ export default function BuilderPage() {
     return undefined;
   };
 
-  const selectedEntity = findNode(entityData, selectedId);
+  const selectedEntity = findNode(currentEntityData, selectedId);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gray-100">
@@ -416,6 +813,7 @@ export default function BuilderPage() {
       <div className="flex-1 min-h-0 overflow-hidden">
         {activeTab === "configuration" ? (
           <ConfigurationView
+            key={selectedContext || "empty"}
             templateName={templateName}
             setTemplateName={setTemplateName}
             llm={llm}
@@ -426,6 +824,12 @@ export default function BuilderPage() {
             setConfidenceScore={setConfidenceScore}
             selectedContext={selectedContext}
             setSelectedContext={setSelectedContext}
+            attributeFields={currentAttributeFields}
+            defaultExpandedFieldIds={
+              selectedContext === "Case Intake Form" && caseIntakeData.length > 0
+                ? [caseIntakeData[0].entity]
+                : ["referral-request"]
+            }
           />
         ) : (
           <PlaygroundView
@@ -441,7 +845,7 @@ export default function BuilderPage() {
             pdfUrl={pdfUrl}
             fileName={fileName}
             fileInputRef={fileInputRef}
-            entityData={entityData}
+            entityData={currentEntityData}
             selectedEntity={selectedEntity}
             toggleExpanded={toggleExpanded}
             setSelectedId={setSelectedId}
@@ -450,6 +854,8 @@ export default function BuilderPage() {
             handleClearUpload={handleClearUpload}
             selectedContext={selectedContext}
             extractedData={extractedData}
+            caseIntakeData={caseIntakeData}
+            fullCaseIntakeTree={fullCaseIntakeTree}
           />
         )}
       </div>
@@ -469,6 +875,8 @@ interface ConfigurationViewProps {
   setConfidenceScore: (v: number) => void;
   selectedContext: string;
   setSelectedContext: (v: string) => void;
+  attributeFields: AttributeField[];
+  defaultExpandedFieldIds: string[];
 }
 
 function ConfigurationView({
@@ -482,8 +890,10 @@ function ConfigurationView({
   setConfidenceScore,
   selectedContext,
   setSelectedContext,
+  attributeFields: configAttributeFields,
+  defaultExpandedFieldIds,
 }: ConfigurationViewProps) {
-  const [expandedFields, setExpandedFields] = useState<string[]>(["referral-request"]);
+  const [expandedFields, setExpandedFields] = useState<string[]>(defaultExpandedFieldIds);
 
   const toggleFieldExpanded = (id: string) => {
     setExpandedFields((prev) =>
@@ -505,8 +915,8 @@ function ConfigurationView({
             className="w-full text-sm border border-gray-300 rounded px-3 py-2 bg-white mb-2"
           >
             <option value="">Select...</option>
+            <option value="Case Intake Form">Case Intake Form</option>
             <option value="PatientReferralDocument">PatientReferralDocument</option>
-            <option value="ClinicalSummary">ClinicalSummary</option>
           </select>
           <button className="w-full text-sm text-[#0176D3] border border-[#0176D3] rounded px-3 py-2 hover:bg-blue-50 mb-3">
             Edit Context Definition
@@ -610,7 +1020,7 @@ function ConfigurationView({
               </div>
 
               {/* Table Rows */}
-              {attributeFields.map((field) => (
+              {configAttributeFields.map((field) => (
                 <AttributeFieldRow
                   key={field.id}
                   field={field}
@@ -705,6 +1115,8 @@ interface PlaygroundViewProps {
   handleClearUpload: () => void;
   selectedContext: string;
   extractedData: any;
+  caseIntakeData: CaseIntakeEntity[];
+  fullCaseIntakeTree: NestedEntityNode[];
 }
 
 function PlaygroundView({
@@ -729,6 +1141,8 @@ function PlaygroundView({
   handleClearUpload,
   selectedContext,
   extractedData,
+  caseIntakeData,
+  fullCaseIntakeTree,
 }: PlaygroundViewProps) {
   return (
     <div className="h-full grid grid-cols-3 overflow-hidden">
@@ -869,6 +1283,21 @@ function PlaygroundView({
               <p className="text-sm text-gray-500 text-center">
                 Select a Context Definition in the Configuration tab to generate prompts.
               </p>
+            </div>
+          ) : selectedContext === "Case Intake Form" ? (
+            <div className="p-3">
+              {fullCaseIntakeTree.map((node) => (
+                <TreeItem
+                  key={node.id}
+                  node={node}
+                  selectedNodeId={selectedId || null}
+                  onSelect={setSelectedId}
+                  expandedIds={expandedIds}
+                  onToggle={toggleExpanded}
+                  prompts={prompts}
+                  onPromptChange={updatePrompt}
+                />
+              ))}
             </div>
           ) : (
             entityData.map((entity) => (
